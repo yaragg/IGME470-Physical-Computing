@@ -8,7 +8,8 @@ int cheekValue = 0; //Output to the cheeks
 
 //Notes and beats for the two cries
 int tones[] = {494, 247};
-float beats[] = {0.5, 1};
+//float beats[] = {0.5, 1};
+float beats[] = {0.5, 1.5};
 int tones2[] = {494, 247, 494};
 float beats2[] = {0.5, 0.7, 0.5};
 
@@ -34,10 +35,10 @@ void loop() {
   analogWrite(cheek2, cheekValue);
 
   unsigned long current = millis();
-  if(fsrValue > 20 && current - previousSound >= soundInterval){
+  if(playing || fsrValue > 20 && current - previousSound >= soundInterval){
     previousSound = current;
     for(int i=0; i<2; i++){
-      if(current - previousSound < beats[i]*500){
+      if(current < previousSound + (unsigned long)beats[i]*500){
         if(!playing){
           tone(speakerPin, tones[i]);  
           playing = true;
@@ -46,7 +47,9 @@ void loop() {
       else playing = false;   
     }
   }
-  else noTone(speakerPin);
+  else if(!playing) noTone(speakerPin);
+
+  previousSound = current;
 
   if(debug){
     Serial.print("FSR sensor = ");
