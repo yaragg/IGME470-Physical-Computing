@@ -18,7 +18,8 @@ void setup() {
 
 void loop() {
   //read the pressure on the FSR
-  fsrValue = analogRead(fsr);
+  fsrValue = analogRead(fsr)*3;
+  if(fsrValue > 1023) fsrValue = 1023;
   lightValue = analogRead(light);
 
   cheekValue = map(fsrValue, 0, 1023, 0, 255);
