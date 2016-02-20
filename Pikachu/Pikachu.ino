@@ -4,11 +4,22 @@ const int flash1 = 3; //Yellow LED for "flash" move
 const int flash2 = 9; //Other yellow LED for the "flash" move
 const int fsr = A0; //FSR in the forehead
 const int light = A1; //Light sensor
+const int speakerPin = 12;
 
 int fsrValue = 0; //Value read from the FSR
 int cheekValue = 0; //Output to the cheeks
 int lightValue = 0; //Light sensor reading
 int flashValue = 0; //Output to "flash" LEDs
+
+//Notes and beats for the cry
+int tones[] = {494, 247, 0, 494, 247, 494};
+float beats[] = {0, 0.5, 1.5, 0.5, 0.5, 0.7, 0.5};
+int soundIndex = 0;
+const int notes = 6;
+
+unsigned long previousSound = 0;
+const long soundInterval = 2000;
+bool playing = false;
 
 const int debug = 1;
 
@@ -30,6 +41,17 @@ void loop() {
   analogWrite(cheek2, cheekValue);
   analogWrite(flash1, flashValue);
   analogWrite(flash2, flashValue);
+
+  //If belly is rubbed, play sound
+  if(fsrValue > 20 && millis() - previousSound > soundInterval) playing = true;
+  
+  if(playing && millis() - previousSound > beats[soundIndex]*500){
+    tone(speakerPin, tones[soundIndex]);
+    soundIndex = (soundIndex + 1)%notes;
+    if(soundIndex == 0) playing = false;
+    previousSound = millis();
+  }
+  if(!playing && millis() - previousSound > beats[notes]*500) noTone(speakerPin);
 
   if(debug){
     Serial.print("FSR sensor = ");
