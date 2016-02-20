@@ -11,13 +11,11 @@ int cheekValue = 0; //Output to the cheeks
 int lightValue = 0; //Light sensor reading
 int flashValue = 0; //Output to "flash" LEDs
 
-//Notes and beats for the two cries
-int tones[] = {494, 247};
-//float beats[] = {0.5, 1};
-float beats[] = {0.5, 1.5};
-int tones2[] = {494, 247, 494};
-float beats2[] = {0.5, 0.7, 0.5};
+//Notes and beats for the cry
+int tones[] = {494, 247, 0, 494, 247, 494};
+float beats[] = {0, 0.5, 1.5, 0.5, 0.5, 0.7, 0.5};
 int soundIndex = 0;
+const int notes = 6;
 
 unsigned long previousSound = 0;
 const long soundInterval = 2000;
@@ -44,29 +42,17 @@ void loop() {
   analogWrite(cheek2, cheekValue);
   analogWrite(flash1, flashValue);
   analogWrite(flash2, flashValue);
+
+  //If belly is rubbed, play sound
+  if(fsrValue > 20 && millis() - previousSound > soundInterval) playing = true;
   
-  if(millis() - previousSound > beats[soundIndex]){
-    soundIndex = (soundIndex + 1)%2;
-    tone(speakerPin, tones[soundIndex], beats[soundIndex]);
+  if(playing && millis() - previousSound > beats[soundIndex]*500){
+    tone(speakerPin, tones[soundIndex]);
+    soundIndex = (soundIndex + 1)%notes;
+    if(soundIndex == 0) playing = false;
     previousSound = millis();
   }
-
-  /*unsigned long current = millis();
-  if(playing || fsrValue > 20 && current - previousSound >= soundInterval){
-    previousSound = current;
-    //for(int i=0; i<2; i++){
-      if(current < previousSound + (unsigned long)beats[soundIndex]*500){
-        if(!playing){
-          tone(speakerPin, tones[soundIndex]);  
-          playing = true;
-        }
-      }
-      else { playing = false;   soundIndex = (soundIndex+1)%2;}
-    //}
-  }
-  else if(!playing) noTone(speakerPin);
-
-  previousSound = current;*/
+  if(!playing && millis() - previousSound > beats[notes]*500) noTone(speakerPin);
 
   if(debug){
     Serial.print("FSR sensor = ");
