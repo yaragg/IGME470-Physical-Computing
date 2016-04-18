@@ -1,7 +1,7 @@
 #define MIC_PIN A0
 #define SAMPLE_RATE 8000
 #define FFT_N 128
-#define LIN_OUT 1
+#define LOG_OUT 1
 #include <FFT.h>
 
 int bin_size = 8000/FFT_N;
@@ -28,13 +28,14 @@ void loop() {
   fft_window();
   fft_reorder();
   fft_run();
-  fft_mag_lin();
+  fft_mag_log();
   
   for(int i=0; i<FFT_N/2; i++)
   {
-    if(fft_lin_out[i] > maxVal)
+    int x = sqrt(fft_log_out[i*2]*fft_log_out[i*2] + fft_log_out[i*2-1]*fft_log_out[i*2-1]);
+    if(x > maxVal)
     {
-      maxVal = fft_lin_out[i];
+      maxVal = x;
       maxIndex = i;
     }
   }
